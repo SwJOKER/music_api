@@ -1,6 +1,0 @@
-/venv/
-/.idea/
-/music_api/api/migrations/
-*.pyc
-__pycache__
-/music_api/db.sqlite3
