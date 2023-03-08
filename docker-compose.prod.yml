@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./music_api
+      dockerfile: Dockerfile.prod
+    command: gunicorn music_api.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - static_volume:/home/api_user/music_api/staticfiles
+    expose:
+      - 8000
+    env_file:
+      - ./music_api/.env.prod
+    depends_on:
+      - db
+  db:
+    image: postgres:latest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./music_api/.env.prod.db
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/home/api_user/music_api/staticfiles
+    ports:
+      - 1337:80
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:
+  static_volume:

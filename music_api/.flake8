@@ -1,0 +1,14 @@
+[flake8]
+
+max-line-length = 120
+
+exclude =
+    ./api/swagger.py,
+    ./api/migrations/,
+    ./api/serializers/__init__.py,
+    ./api/views/__init__.py
+
+# Cutting ourselves some slack
+ignore =
+  # F401 - multiple import on the line
+  F401

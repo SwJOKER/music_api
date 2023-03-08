@@ -1,0 +1,77 @@
+###########
+# BUILDER #
+###########
+
+# pull official base image
+FROM python:3.10.10-alpine as builder
+
+# set work directory
+WORKDIR /usr/src/music_api
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# install psycopg2 dependencies
+RUN apk update \
+    && apk add postgresql-dev gcc python3-dev musl-dev
+
+# linter
+RUN pip install --upgrade pip
+RUN pip install flake8==6.0.0
+COPY . .
+
+RUN flake8 .
+
+# install dependencies, put in wheels dir
+COPY ./requirements.txt .
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/music_api/wheels -r requirements.txt
+
+
+#########
+# FINAL #
+#########
+
+# pull official base image
+FROM python:3.10.10-alpine
+
+# create directory
+RUN mkdir -p /home/music_api
+
+# create the app user
+# -G - group
+# -S - Create a system user|group
+RUN addgroup -S api_user && adduser -S api_user -G api_user
+
+# create the appropriate directories
+ENV HOME=/home/api_user
+ENV APP_HOME=/home/api_user/music_api
+RUN mkdir $APP_HOME
+RUN mkdir $APP_HOME/staticfiles
+WORKDIR $APP_HOME
+
+
+# install dependencies
+# libpq for postgres
+RUN apk update && apk add libpq
+COPY --from=builder /usr/src/music_api/wheels /wheels
+COPY --from=builder /usr/src/music_api/requirements.txt .
+RUN pip install --no-cache /wheels/*
+
+# copy entrypoint.prod.sh
+COPY ./entrypoint.prod.sh .
+RUN sed -i 's/\r$//g'  $APP_HOME/entrypoint.prod.sh
+RUN chmod +x  $APP_HOME/entrypoint.prod.sh
+
+# copy project
+COPY . $APP_HOME
+
+# chown all the files to the app user
+# -R - recursive
+RUN chown -R api_user:api_user $APP_HOME
+
+# change to the app user
+USER api_user
+
+# run entrypoint.prod.sh
+ENTRYPOINT ["/home/api_user/music_api/entrypoint.prod.sh"]

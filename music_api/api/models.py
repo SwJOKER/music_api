@@ -15,7 +15,6 @@ class StripCharFieldsMixin:
 
 # Create your models here.
 class Artist(models.Model, StripCharFieldsMixin):
-
     class Meta:
         verbose_name = 'Artist'
         verbose_name_plural = 'Artists'
@@ -27,7 +26,6 @@ class Artist(models.Model, StripCharFieldsMixin):
 
 
 class Album(models.Model, StripCharFieldsMixin):
-
     class Meta:
         verbose_name = 'Album'
         verbose_name_plural = 'Albums'
@@ -37,14 +35,14 @@ class Album(models.Model, StripCharFieldsMixin):
     artist = models.ForeignKey('Artist', related_name='albums', on_delete=models.CASCADE, null=False, blank=False)
     # recorded sound of a human voice was conducted on April 9, 1860
     year = models.SmallIntegerField(verbose_name='Release year', validators=[MinValueValidator(1860),
-                    MaxValueValidator(limit_value=timezone.now().year)])
+                                                                             MaxValueValidator(
+                                                                                 limit_value=timezone.now().year)])
 
     def __str__(self):
         return self.name
 
 
 class Track(models.Model, StripCharFieldsMixin):
-
     class Meta:
         verbose_name = 'Track'
         verbose_name_plural = 'Tracks'
@@ -52,14 +50,11 @@ class Track(models.Model, StripCharFieldsMixin):
     name = models.CharField(verbose_name='name', max_length=255, null=False, blank=False)
     artist = models.ForeignKey('Artist', related_name='tracks', on_delete=models.CASCADE, null=False, blank=False)
 
-
-
     def __str__(self):
         return self.name
 
 
 class AlbumTrack(models.Model, StripCharFieldsMixin):
-
     class Meta:
         unique_together = ('album', 'order')
 
@@ -69,11 +64,3 @@ class AlbumTrack(models.Model, StripCharFieldsMixin):
 
     def __str__(self):
         return str(self.track)
-
-
-
-
-
-
-
-
