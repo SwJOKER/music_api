@@ -16,6 +16,7 @@ COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
 COPY ./entrypoint.sh .
+# sed fix windows style line ending
 RUN sed -i 's/\r$//g' /usr/src/music_api/entrypoint.sh
 RUN chmod +x /usr/src/music_api/entrypoint.sh
 

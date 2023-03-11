@@ -14,5 +14,5 @@ class ArtistViewSet(AutoManySerializerMixin, viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['name']
     queryset = Artist.objects.annotate(albums_count=Count('albums', distinct=True),
-                                       tracks_count=Count('tracks', distinct=True)).all()
+                                       tracks_count=Count('tracks', distinct=True)).order_by('-id').all()
     pagination_class = Paginator

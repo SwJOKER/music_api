@@ -56,8 +56,11 @@ class Track(models.Model, StripCharFieldsMixin):
 
 class AlbumTrack(models.Model, StripCharFieldsMixin):
     class Meta:
+        verbose_name = 'Album Track'
+        verbose_name_plural = 'Album Tracks'
         unique_together = ('album', 'order')
 
+    artist = models.ForeignKey('Artist', on_delete=models.CASCADE, null=False)
     order = models.SmallIntegerField(null=False, blank=False, validators=[MinValueValidator(1)])
     track = models.ForeignKey('Track', related_name='album_track', on_delete=models.CASCADE, null=False)
     album = models.ForeignKey('Album', related_name='tracks', on_delete=models.CASCADE, null=False)

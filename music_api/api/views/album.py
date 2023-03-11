@@ -1,12 +1,11 @@
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.exceptions import APIException
-from rest_framework_nested.viewsets import NestedViewSetMixin
 
 from .mixins import AutoManySerializerMixin, DiscreteRetrieveSerializerMixin
 from .paginators import Paginator
-from ..models import Album, Artist
+from ..models import Album, Artist, AlbumTrack
 from ..serializers import AlbumSerializer, AlbumRetrieveSerializer, ArtistAlbumSerializer, ArtistAlbumRetrieveSerializer
 
 
@@ -18,7 +17,12 @@ class AlbumViewSet(AutoManySerializerMixin, DiscreteRetrieveSerializerMixin, vie
     pagination_class = Paginator
 
     def get_queryset(self):
-        queryset = Album.objects.prefetch_related('tracks')
+        kwargs = self.request.parser_context.get('kwargs')
+        if pk := kwargs.get('pk'):
+            prefetch_tracks = Prefetch('tracks', queryset=AlbumTrack.objects.filter(album_id=pk).order_by('order'))
+            queryset = Album.objects.prefetch_related(prefetch_tracks)
+        else:
+            queryset = Album.objects.prefetch_related('tracks')
         queryset = queryset.annotate(tracks_count=Count('tracks')).order_by('-id')
         return queryset
 
@@ -34,5 +38,10 @@ class ArtistAlbumViewSet(AutoManySerializerMixin, DiscreteRetrieveSerializerMixi
             return Album.objects.prefetch_related('tracks')
         if not Artist.objects.filter(pk=artist_pk).exists():
             raise APIException('Artist not found')
-        queryset = Album.objects.filter(artist_id=artist_pk).prefetch_related('tracks')
+        if pk := kwargs.get('pk'):
+            prefetch_tracks = Prefetch('tracks', queryset=AlbumTrack.objects.filter(album_id=pk).order_by('order'))
+        else:
+            prefetch_tracks = Prefetch('tracks',
+                                       queryset=AlbumTrack.objects.filter(artist_id=artist_pk).order_by('order'))
+        queryset = Album.objects.filter(artist_id=artist_pk).prefetch_related(prefetch_tracks)
         return queryset.annotate(tracks_count=Count('tracks')).order_by('-id')
