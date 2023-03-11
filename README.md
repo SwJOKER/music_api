@@ -73,4 +73,4 @@ Not checks for exist, may be duplicates. Be aware.<br>
 AlbumTrack has not editing possibility. Only deleting. 
 
 If track with defined in request order exists, then it will release the place and order in album will be updated.
-If order is not defined it assigns automatically.
+If order is not defined it assigned automatically.
