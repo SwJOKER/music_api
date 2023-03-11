@@ -16,7 +16,7 @@ class ArtistTrackViewSet(AutoManySerializerMixin, DiscreteRetrieveSerializerMixi
         kwargs = self.request.parser_context.get('kwargs')
         artist_pk = kwargs.get('artists_pk')
         prefetch_album_tracks = Prefetch('album_track',
-                                         queryset=AlbumTrack.objects.filter(artist=artist_pk).select_related('album'))
+                                         queryset=AlbumTrack.objects.select_related('album'))
         if getattr(self, 'swagger_fake_view', False):
             return Track.objects.order_by('-id')
         if artist_pk and not Artist.objects.filter(pk=artist_pk).exists():
