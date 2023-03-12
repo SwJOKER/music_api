@@ -115,7 +115,6 @@ class AlbumTrackSerializer(serializers.ModelSerializer, ContextUtilsMixin):
         else:
             attrs.update({'order': self._max_order})
         attrs.update({'album_id': self._album.id})
-        attrs.update({'artist_id': self._album.artist_id})
         return attrs
 
     def create(self, validated_data):
